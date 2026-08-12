@@ -31,7 +31,7 @@ TJD0,TJD,x,y,z,xx,yy,zz: Extended;
 Cx,Cy,Cz,A_m: Extended;
 JD1,t1,a1,e1,i1,om1,w1,M1,q1,p1,JD2,t2,a2,e2,i2,om2,w2,M2,q2,p2: Extended;
 alpha,F,CoT,SiT,T,coT1,KSI1,KSI2,LXc,LYc,LZc,LX,LY,LZ,L: Extended;
-CosI,CosP,ro1,ro2,ro5:Extended;
+CosI,CosP,ro1,ro2,ro5,PI_big,D_SH:Extended;
 j,jj:integer;
 
 infile, infile1, infile2, outfile, outdebug: text;
@@ -63,7 +63,7 @@ Rewrite(outdebug);  }
 Assign(outfile,'file.TXT');
 Rewrite(outfile);
 
-Writeln(outfile, 'JD t ro1 ro2 ro5');
+Writeln(outfile, 'JD t ro1 ro2 ro5 D_sh');
 RandSeed:=1;
 {Randomize;}
 
@@ -120,6 +120,7 @@ L:=1;
 while not Eof(infile1) do
 begin
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
+// Converting angles from degrees to radians
 i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {переводим угловые элементы опорной в радианы}
 p1:=a1*(1-sqr(e2));
 
@@ -132,17 +133,33 @@ for j:=1 to N do
   Readln(infile2, JD2,t2,a2,e2,i2,om2,w2,M2,q2);
   if JD1=JD2 then
    begin
+   // Converting angles from degrees to radians
     i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {переводим угловые элементы опорной в радианы}
     p2:=a2*(1-sqr(e2));
     CosI:=(Cos(i1)*Cos(i2))+(Sin(i1)*Sin(i2)*Cos(om1-om2));
     CosP:=Sin(i1)*Sin(i2)*Sin(w1)*Sin(w2)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i2)*Cos(w1)*Sin(w2)-Cos(i1)*Sin(w1)*Cos(w1))*Sin(om1-om2);
+
+    I:=ArcCos(CosI);
+
+    if Abs(om1-om2) > Pi then
+      begin
+       PI_big:=om2-om1-2*ArcSin(Cos(i2+i1)*Sin((om2-om1)/2)*Sec(I/2));
+      end
+    else
+      begin
+       PI_big:=om2-om1+2*ArcSin(Cos(i2+i1)*Sin((om2-om1)/2)*Sec(I/2));
+      end;
+
     ro1:=sqrt((1/L)*(p1+p2-2*sqrt(p1*p2)*CosI)+(sqr(e1)+sqr(e2)-2*e1*e2*CosP));
     ro2:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(CosI+e1*e2*CosP));
     ro5:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(e1*e2+Cos(i1-i2)));
+    D_SH:=sqr(q1-q2)+sqr(e1-e2)+4*sqr(Sin(I/2))+sqr(e1+e2)*sqr(Sin(PI_big));
+
     Writeln(JD1:6:2,' ',JD2:6:2,' ',t1:6:2,' ',t2:6:2);
     Writeln('CosI = ',CosI:6:2,' ',p1:6:2,' ',p2:6:2);
     Writeln('CosP = ',CosP:6:6);
     Writeln('ro2 = ',ro2:6:6);
+    Writeln('D_SH = ',D_SH:6:6);
     //Readln;
 
 
@@ -153,7 +170,7 @@ for j:=1 to N do
     //VYE:=yy;
     //VZE:=zz;
 
-    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' '{, VXE,' ', VYE,' ', VZE });
+    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' '{, VXE,' ', VYE,' ', VZE });
     begin
         Break; // ????????? ????
     end;
