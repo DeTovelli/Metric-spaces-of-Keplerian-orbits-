@@ -10,13 +10,13 @@ uses
 
 Label MET1,AGAIN;
 
-Const N=85641074;  {Количество моделируемых частиц}
+Const N=85641074;  {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ}
     {IAU 1994}
-    KV=1/29.7846918325927450;  {Для перевода скорости в км/с при mu=1}
+    KV=1/29.7846918325927450;  {пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ/пїЅ пїЅпїЅпїЅ mu=1}
     rad=Pi/180.0;
     au_km=1.49597870691000015E+8; {1 au in km; DE406}
-    day_sec = 86400;  {сутки в секенду}
-    KMAU=1/au_km;     {км в АЕ}
+    day_sec = 86400;  {пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+    KMAU=1/au_km;     {пїЅпїЅ пїЅ пїЅпїЅ}
     GM=1.32712440018E+11;  {km3*s-2}
     MU=2.9591220828559110225E-4; {= k**2; k = 0.01720209895 [(AU^3 d^-2])^1/2}
 
@@ -31,7 +31,7 @@ TJD0,TJD,x,y,z,xx,yy,zz: Extended;
 Cx,Cy,Cz,A_m: Extended;
 JD1,t1,a1,e1,i1,om1,w1,M1,q1,p1,JD2,t2,a2,e2,i2,om2,w2,M2,q2,p2: Extended;
 alpha,F,CoT,SiT,T,coT1,KSI1,KSI2,LXc,LYc,LZc,LX,LY,LZ,L: Extended;
-CosI,CosP,ro1,ro2,ro5,PI_big,D_SH:Extended;
+CosI,CosP,ro1,ro2,ro5,PI_big,D_SH,D_D,Pheta:Extended;
 j,jj:integer;
 
 infile, infile1, infile2, outfile, outdebug: text;
@@ -47,9 +47,9 @@ infile, infile1, infile2, outfile, outdebug: text;
 begin {main}
 
 {Assign(infile,'ref.orb'); Reset(infile);
-{Считываем шесть элементов, угловые в градусах и JD}
+{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ JD}
 {Read(infile, a,e,i,om,w,M,JD);
-{переводим угловые элементы опорной в радианы}
+{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 {i:=i*rad; om:=om*rad; w:=w*rad; M:=M*rad;
 JDi:=JD;
 
@@ -63,55 +63,55 @@ Rewrite(outdebug);  }
 Assign(outfile,'file.TXT');
 Rewrite(outfile);
 
-Writeln(outfile, 'JD t ro1 ro2 ro5 D_sh');
+Writeln(outfile, 'JD t ro1 ro2 ro5 D_SH D_D');
 RandSeed:=1;
 {Randomize;}
 
-{RC:=1.9;     {km, радиус ядракометы}
-{dens:=3.0;  {g cm-3, плотность метеороида}
-{mass:=1.0000; {g, масса метеороида}
-{rpart:=power(0.75*mass/(Pi*dens),1.0/3.0);  {cm, радиус метеороида}
-{beta:=5.8E-5/(rpart*dens); {Fr/Fgr -- безразмерный коэффициент}
-{mu_red:=MU*(1-beta); {Редукция массы Солнца за Световое давление}
+{RC:=1.9;     {km, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+{dens:=3.0;  {g cm-3, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+{mass:=1.0000; {g, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+{rpart:=power(0.75*mass/(Pi*dens),1.0/3.0);  {cm, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+{beta:=5.8E-5/(rpart*dens); {Fr/Fgr -- пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
+{mu_red:=MU*(1-beta); {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 
 
 {kn:=sqrt(GM/(au_km*au_km*au_km))*day_sec;
-n_:=kn/(a*sqrt(a));    {рад/сут}
+n_:=kn/(a*sqrt(a));    {пїЅпїЅпїЅ/пїЅпїЅпїЅ}
 
 
-{по средней аномалии находим истинную}
+{пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 {EE:=kepl1(M,e);
 r:=a*(1-e*cos(EE));
 sv:=a*sqrt(1-e*e)*sin(EE)/r;
 cv:=a*(cos(EE)-e)/r;
 v:=ArcTg(sv,cv);
 
-{Выводим в файл начальную орбиту}
+{пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ}
 {j:=0;
 Writeln(outfile, a:15:10,e:15:10,i/rad:15:9,om/rad:15:9,w/rad:15:9,M/rad:15:9,
            ' ',Jdi:14:5,'  ',v/rad:5:1,'  ',j:5);
 
 
-{Ось Х направлена к Солнцу}
-{alpha:=180*rad;  {Полураствор конуса, 180 для }
+{пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ}
+{alpha:=180*rad;  {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, 180 пїЅпїЅпїЅ }
 //TJD0:= 2459586.50;
 Assign(infile1,'elem_point1_2003EH1.dat');
 Reset(infile1);
-{Считываем JD, шесть элементов, угловые в градусах }
+{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ JD, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ }
 Readln(infile1);
 Readln(infile1);
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
-i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {переводим угловые элементы опорной в радианы}
+i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 Writeln(JD1:6:2,t1:6:2,a1:6:2,e1:6:2,i1:6:2,om1:6:2,w1:6:2,M1:6:2,q1:6:2);
 //Readln;
 
 Assign(infile2,'elem_point2_2009GS18.dat');
 Reset(infile2);
-{Считываем шесть элементов, угловые в градусах и JD}
+{пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ JD}
 Readln(infile2);
 Readln(infile2);
 Readln(infile2, JD2,t2,a2,e2,i2,om2,w2,M2,q2);
-i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {переводим угловые элементы опорной в радианы}
+i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 
 Writeln(JD2:6:2,t2:6:2,a2,e2,i2,om2,w2,M2,q2);
 //Readln;
@@ -121,7 +121,7 @@ while not Eof(infile1) do
 begin
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
 // Converting angles from degrees to radians
-i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {переводим угловые элементы опорной в радианы}
+i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
 p1:=a1*(1-sqr(e2));
 
 Writeln('TJD1 = ',JD1:6:2,' t1 = ',t1:6:2,t1:6:2);
@@ -134,7 +134,7 @@ for j:=1 to N do
   if JD1=JD2 then
    begin
    // Converting angles from degrees to radians
-    i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {переводим угловые элементы опорной в радианы}
+    i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ}
     p2:=a2*(1-sqr(e2));
     CosI:=(Cos(i1)*Cos(i2))+(Sin(i1)*Sin(i2)*Cos(om1-om2));
     CosP:=Sin(i1)*Sin(i2)*Sin(w1)*Sin(w2)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i2)*Cos(w1)*Sin(w2)-Cos(i1)*Sin(w1)*Cos(w1))*Sin(om1-om2);
@@ -150,16 +150,20 @@ for j:=1 to N do
        PI_big:=om2-om1+2*ArcSin(Cos(i2+i1)*Sin((om2-om1)/2)*Sec(I/2));
       end;
 
+     Pheta:=ArcCos(Sin(i1)*Sin(i2)*Sin(w1)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i1)*Cos(w1)*Cos(w2)-Cos(i)*Sin(w1)*Sin(w2))*Sin(om1-om2));  
+
     ro1:=sqrt((1/L)*(p1+p2-2*sqrt(p1*p2)*CosI)+(sqr(e1)+sqr(e2)-2*e1*e2*CosP));
     ro2:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(CosI+e1*e2*CosP));
     ro5:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(e1*e2+Cos(i1-i2)));
-    D_SH:=sqr(q1-q2)+sqr(e1-e2)+4*sqr(Sin(I/2))+sqr(e1+e2)*sqr(Sin(PI_big));
+    D_SH:=sqrt(sqr(q1-q2)+sqr(e1-e2)+4*sqr(Sin(I/2))+sqr(e1+e2)*sqr(Sin(PI_big)));
+    D_D:=sqrt(sqr((e1-e1)/(e1+e2))+sqr((q1-q2)/q1+q2)+sqr(I/Pi)+sqr((e1+e2)/2)*sqr(Pheta/Pi));
 
     Writeln(JD1:6:2,' ',JD2:6:2,' ',t1:6:2,' ',t2:6:2);
     Writeln('CosI = ',CosI:6:2,' ',p1:6:2,' ',p2:6:2);
     Writeln('CosP = ',CosP:6:6);
     Writeln('ro2 = ',ro2:6:6);
     Writeln('D_SH = ',D_SH:6:6);
+     Writeln('D_D = ',D_D:6:6);
     //Readln;
 
 
@@ -170,16 +174,16 @@ for j:=1 to N do
     //VYE:=yy;
     //VZE:=zz;
 
-    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' '{, VXE,' ', VYE,' ', VZE });
+    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' '{, VXE,' ', VYE,' ', VZE });
     begin
         Break; // ????????? ????
     end;
    end;
  end;
 
- { ve:=v; {‚???®? ?§ ?®???}
+ { ve:=v; {пїЅ???пїЅ? ?пїЅ ?пїЅ???}
 {  if ve<0 then ve:=ve+2*pi;
-  {‘?®?®??? “???« }
+  {пїЅ?пїЅ?пїЅ??? пїЅ???пїЅпїЅ}
 {   COOR(A,E,I,OM,W,VE,mu,RE,XE,YE,ZE,VXE,VYE,VZE,VV);
    C:=SQRT((1/(rpart*dens*EXP(LN(RE)*2.25))-0.013*RC) *RC)*656;  {cm/sec}
 {   C:=C*1E-5*(day_sec/au_km); {cm/sec => au/day}
@@ -191,18 +195,18 @@ for j:=1 to N do
   T:=ArcTg(SiT,CoT);
 
 
-  LXc:=CoT;              {“?«? ? ?®¬??­®© ?????¬?}
+  LXc:=CoT;              {пїЅ?пїЅ? ? ?пїЅпїЅ??пїЅпїЅпїЅ ?????пїЅ?}
  { LYc:=SiT*COS(F);
   LZc:=SiT*SIN(F);
 
-  {?? § ??? ?? ?®­??®«??®? ?? ®?? ¤«? ? ¦¤®?® ­®?®?® ®?????  !}
+  {?? пїЅпїЅ???пїЅ?? ?пїЅпїЅ??пїЅпїЅ??пїЅ?пїЅ?? пїЅ?? пїЅпїЅ? ?пїЅпїЅпїЅпїЅ?пїЅ пїЅпїЅ?пїЅ?пїЅ пїЅ?????пїЅ !}
  { Convert_(-xe,-ye,-ze,vze*ye-vye*ze,vxe*ze-vze*xe,vye*xe-vxe*ye,
-  LXc,LYc,LZc,LX,LY,LZ);  {‚ ??«?????????? ?§ ?®¬??­®©}
+  LXc,LYc,LZc,LX,LY,LZ);  {пїЅ ??пїЅ?????????? ?пїЅ ?пїЅпїЅ??пїЅпїЅпїЅ}
 
 {  CX:=C*LX;CY:=C*LY;CZ:=C*LZ;
   VXC:=VXE+CX;VYC:=VYE+CY;VZC:=VZE+CZ;
   VELOR3(XE,YE,ZE,VXC,VYC,VZC,AI,EI,II,OMI,WI,VI,MU);
-  if ai<0 then continue;  {®????? ?¬ ??????®«?}
+  if ai<0 then continue;  {пїЅ?????пїЅ?пїЅ ??????пїЅпїЅ?}
 {  if omi<0 then omi:=omi+2*pi;
 
   sE:=sin(vi)*re/(ai*sqrt(1-sqr(ei)));
@@ -211,15 +215,15 @@ for j:=1 to N do
   MI:=EEi-ei*sE;
   if Mi<0 then Mi:=Mi+2*PI;   }
 
-  (*  ??®? ???®? ­?¦?­, ??«? ????®? ­? ? ?®???
+  (*  ??пїЅ? ???пїЅ? пїЅ?пїЅ?пїЅ, ??пїЅ? ????пїЅ? пїЅ? ? ?пїЅ???
 
-	   {?® ve ­ ?®¤?¬ ¤ ?? ????®? }
+	   {?пїЅ ve пїЅпїЅ?пїЅпїЅ?пїЅ пїЅпїЅ?? ????пїЅ?пїЅ}
 	  sE:=sin(ve)*re/(a*sqrt(1-sqr(e)));
 	  cE:=cos(ve)*re/a+e;
 	  EE:=ArcTg(sE,cE);
 	  M:=EE-e*sE;
 
-	  {‘??? ?¬, ??® ®?®?­ ? ®????  ®?­®????? ? ¬®¬?­?? ??®?®¦¤?­?? ??????«??}
+	  {пїЅ???пїЅ?пїЅ, ??пїЅ пїЅ?пїЅ?пїЅпїЅ? пїЅ????пїЅ пїЅ?пїЅпїЅ????? ? пїЅпїЅпїЅ?пїЅ?? ??пїЅ?пїЅпїЅпїЅ?пїЅ?? ??????пїЅ??}
 	  if M<Pi then
 	    JDi:=JD+M/n_   {M in rad}
 	  else JDi:=JD-(2*Pi-M)/n_;
