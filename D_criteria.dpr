@@ -33,6 +33,8 @@ JD1,t1,a1,e1,i1,om1,w1,M1,q1,p1,JD2,t2,a2,e2,i2,om2,w2,M2,q2,p2: Extended;
 alpha,F,CoT,SiT,T,coT1,KSI1,KSI2,LXc,LYc,LZc,LX,LY,LZ,L: Extended;
 CosI,CosP,ro1,ro2,ro5,PI_big,D_SH,D_D,Pheta:Extended;
 j,jj:integer;
+  // Mathematical range error protection variables (NaN)
+  ArgArcSin, ArgPheta: Extended;
 
 infile, infile1, infile2, outfile, outdebug: text;
 
@@ -44,219 +46,125 @@ infile, infile1, infile2, outfile, outdebug: text;
 {$I r4.fnc}
 {$I arctg.fnc}
 
+// Auxiliary function for protection against exceeding the range [-1, 1]
+function Clamp(Value: Extended): Extended;
+begin
+  if Value > 1.0 then Result := 1.0
+  else if Value < -1.0 then Result := -1.0
+  else Result := Value;
+end;
+
 begin {main}
+  // Check the physical presence of files on the disk before launching
+  if not FileExists('elem_point1_2003EH1.dat') then
+  begin
+    Writeln('Error: Input file "elem_point1_2003EH1.dat" not found!');
+    Exit;
+  end;
 
-{Assign(infile,'ref.orb'); Reset(infile);
-{��������� ����� ���������, ������� � �������� � JD}
-{Read(infile, a,e,i,om,w,M,JD);
-{��������� ������� �������� ������� � �������}
-{i:=i*rad; om:=om*rad; w:=w*rad; M:=M*rad;
-JDi:=JD;
+  if not FileExists('elem_point2_2009GS18.dat') then
+  begin
+    Writeln('Error: Input file "elem_point2_2009GS18.dat" not found!');
+    Exit;
+  end;
 
-Close(infile);}
+Assign(outfile, 'file.TXT');
+  Rewrite(outfile);
+  Writeln(outfile, 'JD t ro1 ro2 ro5 D_SH D_D');
 
-{Assign(outdebug,'example.out');
-Rewrite(outdebug);  }
+  Assign(infile1, 'elem_point1_2003EH1.dat');
+  Reset(infile1);
+  
+  // Skipping the first three header lines of the first file
+  Readln(infile1);
+  Readln(infile1);
+  Readln(infile1, JD1, t1, a1, e1, i1, om1, w1, M1, q1);
+  
+  i1 := i1 * rad; om1 := om1 * rad; w1 := w1 * rad; M1 := M1 * rad;
+  Writeln('First object initial entry loaded.');
 
-
-
-Assign(outfile,'file.TXT');
-Rewrite(outfile);
-
-Writeln(outfile, 'JD t ro1 ro2 ro5 D_SH D_D');
-RandSeed:=1;
-{Randomize;}
-
-{RC:=1.9;     {km, ������ ����������}
-{dens:=3.0;  {g cm-3, ��������� ����������}
-{mass:=1.0000; {g, ����� ����������}
-{rpart:=power(0.75*mass/(Pi*dens),1.0/3.0);  {cm, ������ ����������}
-{beta:=5.8E-5/(rpart*dens); {Fr/Fgr -- ������������ �����������}
-{mu_red:=MU*(1-beta); {�������� ����� ������ �� �������� ��������}
-
-
-{kn:=sqrt(GM/(au_km*au_km*au_km))*day_sec;
-n_:=kn/(a*sqrt(a));    {���/���}
-
-
-{�� ������� �������� ������� ��������}
-{EE:=kepl1(M,e);
-r:=a*(1-e*cos(EE));
-sv:=a*sqrt(1-e*e)*sin(EE)/r;
-cv:=a*(cos(EE)-e)/r;
-v:=ArcTg(sv,cv);
-
-{������� � ���� ��������� ������}
-{j:=0;
-Writeln(outfile, a:15:10,e:15:10,i/rad:15:9,om/rad:15:9,w/rad:15:9,M/rad:15:9,
-           ' ',Jdi:14:5,'  ',v/rad:5:1,'  ',j:5);
-
-
-{��� � ���������� � ������}
-{alpha:=180*rad;  {����������� ������, 180 ��� }
-//TJD0:= 2459586.50;
-Assign(infile1,'elem_point1_2003EH1.dat');
-Reset(infile1);
-{��������� JD, ����� ���������, ������� � �������� }
-Readln(infile1);
-Readln(infile1);
-Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
-i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {��������� ������� �������� ������� � �������}
-Writeln(JD1:6:2,t1:6:2,a1:6:2,e1:6:2,i1:6:2,om1:6:2,w1:6:2,M1:6:2,q1:6:2);
-//Readln;
-
-Assign(infile2,'elem_point2_2009GS18.dat');
-Reset(infile2);
-{��������� ����� ���������, ������� � �������� � JD}
-Readln(infile2);
-Readln(infile2);
-Readln(infile2, JD2,t2,a2,e2,i2,om2,w2,M2,q2);
-i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {��������� ������� �������� ������� � �������}
-
-Writeln(JD2:6:2,t2:6:2,a2,e2,i2,om2,w2,M2,q2);
-//Readln;
-L:=1;
+  Assign(infile2, 'elem_point2_2009GS18.dat');
+  
+  L := 1;
 
 while not Eof(infile1) do
 begin
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
 // Converting angles from degrees to radians
 i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {��������� ������� �������� ������� � �������}
-p1:=a1*(1-sqr(e2));
+p1:=a1*(1-sqr(e1));
 
-Writeln('TJD1 = ',JD1:6:2,' t1 = ',t1:6:2,t1:6:2);
+Writeln('TJD1 = ',JD1:6:2,' t1 = ',t1:6:2);
 //Readln;
 
-for j:=1 to N do
+// Reset infile2 to the beginning before searching
+Reset(infile2);
+Readln(infile2);
+Readln(infile2);
+// Read infile2 to the end or until we find N records
+while not Eof(infile2) do
+//for j:=1 to N do
  begin
 
   Readln(infile2, JD2,t2,a2,e2,i2,om2,w2,M2,q2);
-  if JD1=JD2 then
+  //if JD1=JD2 then
+  if Abs(JD1 - JD2) < 1e-6 then// Comparing Float numbers for equality using delta
    begin
    // Converting angles from degrees to radians
     i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {��������� ������� �������� ������� � �������}
     p2:=a2*(1-sqr(e2));
+
+    // 1. Protection for the orbital inclination function
     CosI:=(Cos(i1)*Cos(i2))+(Sin(i1)*Sin(i2)*Cos(om1-om2));
+    CosI := Clamp(CosI); // We guarantee that CosI lies in [-1; 1]
     CosP:=Sin(i1)*Sin(i2)*Sin(w1)*Sin(w2)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i2)*Cos(w1)*Sin(w2)-Cos(i1)*Sin(w1)*Cos(w1))*Sin(om1-om2);
 
     I:=ArcCos(CosI);
 
-    if Abs(om1-om2) > Pi then
-      begin
-       PI_big:=om2-om1-2*ArcSin(Cos(i2+i1)*Sin((om2-om1)/2)*Sec(I/2));
-      end
-    else
-      begin
-       PI_big:=om2-om1+2*ArcSin(Cos(i2+i1)*Sin((om2-om1)/2)*Sec(I/2));
-      end;
+    // 2. Protection for calculating the ArcSin argument (for PI_big)
+    // Check that the secant does not cause division by zero if Cos(I/2) is near zero
+        if Abs(Cos(I / 2)) > 1e-9 then
+        begin
+          ArgArcSin := Cos(i2 + i1) * Sin((om2 - om1) / 2) * (1.0 / Cos(I / 2));
+          ArgArcSin := Clamp(ArgArcSin);  // Protection against going beyond [-1; 1]
 
-     Pheta:=ArcCos(Sin(i1)*Sin(i2)*Sin(w1)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i1)*Cos(w1)*Cos(w2)-Cos(i)*Sin(w1)*Sin(w2))*Sin(om1-om2));  
+          if Abs(om1 - om2) > Pi then
+            PI_big := om2 - om1 - 2 * ArcSin(ArgArcSin)
+          else
+            PI_big := om2 - om1 + 2 * ArcSin(ArgArcSin);
+        end
+        else
+        begin
+          PI_big := 0;  // Prevent division by 0 in collinear orbits
+        end;
 
+    // 3. Protection for Pheta
+    ArgPheta := Sin(i1)*Sin(i2)*Sin(w1)+(Cos(w1)*Cos(w2)+Cos(i1)*Cos(i2)*Sin(w1)*Sin(w2))*Cos(om1-om2)+(Cos(i1)*Cos(w1)*Cos(w2)-Cos(i1)*Sin(w1)*Sin(w2))*Sin(om1-om2);
+    ArgPheta := Clamp(ArgPheta); // Protection against going beyond [-1; 1]
+    Pheta := ArcCos(ArgPheta);
+
+    // Calculation of the Kholshevnikov, Southworth-Hawkins, and Drummond metrics
     ro1:=sqrt((1/L)*(p1+p2-2*sqrt(p1*p2)*CosI)+(sqr(e1)+sqr(e2)-2*e1*e2*CosP));
     ro2:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(CosI+e1*e2*CosP));
     ro5:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(e1*e2+Cos(i1-i2)));
     D_SH:=sqrt(sqr(q1-q2)+sqr(e1-e2)+4*sqr(Sin(I/2))+sqr(e1+e2)*sqr(Sin(PI_big)));
-    D_D:=sqrt(sqr((e1-e1)/(e1+e2))+sqr((q1-q2)/q1+q2)+sqr(I/Pi)+sqr((e1+e2)/2)*sqr(Pheta/Pi));
+    D_D:=sqrt(sqr((e1-e2)/(e1+e2))+sqr((q1-q2)/q1+q2)+sqr(I/Pi)+sqr((e1+e2)/2)*sqr(Pheta/Pi));
 
     Writeln(JD1:6:2,' ',JD2:6:2,' ',t1:6:2,' ',t2:6:2);
     Writeln('CosI = ',CosI:6:2,' ',p1:6:2,' ',p2:6:2);
     Writeln('CosP = ',CosP:6:6);
     Writeln('ro2 = ',ro2:6:6);
     Writeln('D_SH = ',D_SH:6:6);
-     Writeln('D_D = ',D_D:6:6);
-    //Readln;
+    Writeln('D_D = ',D_D:6:6);
 
-
-    //XE:=x;
-    //YE:=y;
-    //ZE:=z;
-    //VXE:=xx;
-    //VYE:=yy;
-    //VZE:=zz;
-
+    // // Write the results to the output file
     Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' '{, VXE,' ', VYE,' ', VZE });
-    begin
-        Break; // ????????? ????
+
+    Break;  // Found a match for the current JD1 - exit infile2 and take the next line infile1
+
     end;
    end;
  end;
-
- { ve:=v; {�???�? ?� ?�???}
-{  if ve<0 then ve:=ve+2*pi;
-  {�?�?�??? �???��}
-{   COOR(A,E,I,OM,W,VE,mu,RE,XE,YE,ZE,VXE,VYE,VZE,VV);
-   C:=SQRT((1/(rpart*dens*EXP(LN(RE)*2.25))-0.013*RC) *RC)*656;  {cm/sec}
-{   C:=C*1E-5*(day_sec/au_km); {cm/sec => au/day}
-
-
-{  KSI1:=RANDOM;KSI2:=RANDOM;
-  F:=2*Pi*KSI1;CoT:=1-(1-Cos(alpha))*KSI2;
-  SiT:=Sqrt(1-CoT*CoT);
-  T:=ArcTg(SiT,CoT);
-
-
-  LXc:=CoT;              {�?�? ? ?��??��� ?????�?}
- { LYc:=SiT*COS(F);
-  LZc:=SiT*SIN(F);
-
-  {?? ��???�?? ?��??��??�?�?? �?? ��? ?����?� ��?�?� �?????� !}
- { Convert_(-xe,-ye,-ze,vze*ye-vye*ze,vxe*ze-vze*xe,vye*xe-vxe*ye,
-  LXc,LYc,LZc,LX,LY,LZ);  {� ??�?????????? ?� ?��??���}
-
-{  CX:=C*LX;CY:=C*LY;CZ:=C*LZ;
-  VXC:=VXE+CX;VYC:=VYE+CY;VZC:=VZE+CZ;
-  VELOR3(XE,YE,ZE,VXC,VYC,VZC,AI,EI,II,OMI,WI,VI,MU);
-  if ai<0 then continue;  {�?????�?� ??????��?}
-{  if omi<0 then omi:=omi+2*pi;
-
-  sE:=sin(vi)*re/(ai*sqrt(1-sqr(ei)));
-  cE:=cos(vi)*re/ai+ei;
-  EEi:=ArcTg(sE,cE);
-  MI:=EEi-ei*sE;
-  if Mi<0 then Mi:=Mi+2*PI;   }
-
-  (*  ??�? ???�? �?�?�, ??�? ????�? �? ? ?�???
-
-	   {?� ve ��?��?� ��?? ????�?�}
-	  sE:=sin(ve)*re/(a*sqrt(1-sqr(e)));
-	  cE:=cos(ve)*re/a+e;
-	  EE:=ArcTg(sE,cE);
-	  M:=EE-e*sE;
-
-	  {�???�?�, ??� �?�?��? �????� �?��????? ? ���?�?? ??�?���?�?? ??????�??}
-	  if M<Pi then
-	    JDi:=JD+M/n_   {M in rad}
-	  else JDi:=JD-(2*Pi-M)/n_;
-
-	  if omi<0 then omi:=omi+2*Pi;
-
-  *)
-
- { Writeln(outfile, ai:15:10,ei:15:10,ii/rad:15:9,omi/rad:15:9,wi/rad:15:9,Mi/rad:15:9,
-           ' ',Jdi:14:5,'  ',ve/rad:5:1,'  ',j:5);
-(*     '  ',T/k:5:1,'  ',F/k:5:1,'  ',c/(kv*1e-3):5:1,' ',ve/k:5:1,' ',*)
-                                      (* m/s  *)
-
-  {$IFDEF DEBUG}
- (* Writeln(outdebug,'ve = ', ve);
-  Writeln(outdebug,'T  = ', T/k);
-  coT1:=(-xe*Lx-ye*Ly-ze*Lz)/re;
-  Writeln(outdebug,'coT1 = ', coT1);
-  Writeln(outdebug);
-  Writeln(outdebug,'xe = ', xe);
-  Writeln(outdebug,'ye = ', ye);
-  Writeln(outdebug,'ze = ', ze);
-  Writeln(outdebug,'Vxe = ', Vxe);
-  Writeln(outdebug,'Vye = ', Vye);
-  Writeln(outdebug,'Vze = ', Vze);
-  Writeln(outdebug,'cx = ', cx);
-  Writeln(outdebug,'cy = ', cy);
-  Writeln(outdebug,'cz = ', cz);
-  Close(outdebug);
-  Halt;
-  {$ENDIF}
-          *)
-end; {j}
 
 Close(infile1);
 Close(infile2);
