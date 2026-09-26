@@ -1,36 +1,51 @@
-# Metric-spaces-of-Keplerian-orbits-
+# ☄️ Metric-spaces-of-Keplerian-orbits
+## ⚡️ Планируемые оптимизации и расчет MOID (Roadmap)
 
+В текущей версии вычисление MOID реализовано методом грубого перебора (Brute-force grid search) с фиксированным шагом \(1^\circ\). Это дает сложность \(\mathcal{O}(N \cdot 360^2)\) на каждую эпоху. Для работы с большими базами данных (миллионы объектов) планируется внедрение следующих оптимизаций:
 
-The repository contains Pascal-language software tools for calculating metric distances in Keplerian orbital spaces. The algorithms are based on theoretical methods of celestial mechanics and the work of K. V. Kholshevnikov.
+1. **Двухэтапный алгоритм (Грубая сетка + Градиентный спуск):**
+   * **Этап 1:** Быстрое сканирование по разреженной сетке с шагом \(10^\circ\)–\(15^\circ\) для локализации подпространств с локальными минимумами.
+   * **Этап 2:** Уточнение истинного глобального минимума с помощью алгоритма градиентного спуска (или метода золотого сечения) в найденных локальных минимумах. Это сократит количество обращений к процедуре `COOR` более чем в 50 раз.
+2. **Предварительная фильтрация по D-критериям:**
+   * Расчет MOID запускается только в том случае, если геометрические метрики сходства (\(D_{SH}\) или \(D_D\)) находятся ниже определенного порога (например, \(D_{SH} < 0.25\)). Если орбиты заведомо разные по форме и ориентации, тратить ресурсы на точный поиск MOID не имеет практического смысла.
+3. **Аналитические триггеры:**
+   * Интеграция быстрых алгебраических тестов (например, критериев пересечения плоскостей орбит или границ по радиусам афелия и перигелия: если \(q_1 > Q_2\) или \(q_2 > Q_1\), то минимальное расстояние гарантированно не может быть меньше \(\vert{}q_1 - Q_2\vert{}\)).
+   
+The repository contains Pascal-language software tools for calculating metric distances in Keplerian orbital spaces. The algorithms are based on theoretical methods of celestial mechanics, the work of K. V. Kholshevnikov, and numerical optimization.
 
-The program compares the orbital elements of two celestial bodies at identical epochs and calculates five fundamental metrics of orbital proximity. | Программа сопоставляет орбитальные элементы двух небесных тел на одинаковые эпохи и рассчитывает пять фундаментальных метрик близости орбит.
+The program compares the orbital elements of two celestial bodies at identical epochs and calculates fundamental metrics of orbital proximity alongside the minimum distance between orbits. | Программа сопоставляет орбитальные элементы двух небесных тел на одинаковые эпохи, рассчитывает фундаментальные метрики близости орбит и минимальное расстояние между ними.
 
 
 ## 🚀 Key Features | Ключевые возможности
 
 * **Time Synchronization:** Automatically searches and compares orbital data on the same Julian Date (`JD`). | **Синхронизация по времени:** Автоматический поиск и сопоставление орбитальных данных на одинаковые Юлианские даты (`JD`).
-* **Kholshevnikov metrics:** Calculation of distances in factor spaces of orbits (\(\rho_1\), \(\rho_2\), \(\rho_5\)) | **Метрики Холшевникова:** Расчет расстояний в фактор-пространствах орбит (\(\rho_1\), \(\rho_2\), \(\rho_5\)).
-* **D-criteria:** Calculation of classical astronomical orbital similarity criteria (Southworth-Hawkins \(D_{SH}\) and Drummond \(D_D\) | **D-критерии:** Вычисление классических астрономических критериев сходства орбит (Саутворта-Хокинса \(D_{SH}\) и Драммонда \(D_D\)).
+* **Kholshevnikov metrics:** Calculation of distances in factor spaces of orbits (\(\rho_1\), \(\rho_2\), \(\rho_5\)). | **Метрики Холшевникова:** Расчет расстояний в фактор-пространствах орбит (\(\rho_1\), \(\rho_2\), \(\rho_5\)).
+* **D-criteria:** Calculation of classical astronomical orbital similarity criteria (Southworth-Hawkins \(D_{SH}\) and Drummond \(D_D\)). | **D-критерии:** Вычисление классических астрономических критериев сходства орбит (Саутворта-Хокинса \(D_{SH}\) и Драммонда \(D_D\)).
+* **MOID Computation:** Numerical estimation of the Minimum Orbit Intersection Distance between two elliptical orbits. | **Вычисление MOID:** Численный расчет минимального расстояния между двумя эллиптическими орбитами в пространстве.
 
-### Algorithm for calculating distances between orbits | Алгоритм расчета расстояний между орбитами
+
+## 📐 Distance Calculation Algorithms | Алгоритмы расчета расстояний
 
 The program compares the orbital elements of two bodies at the same epochs (`JD1 == JD2`) and calculates the following metrics: | Программа сопоставляет орбитальные элементы двух тел на одинаковые эпохи (`JD1 == JD2`) и рассчитывает следующие метрики:
 
-1. **Mutual inclination of orbits | Взаимное наклонение орбит ($I$):**
-   
-   $$\cos I = \cos i_1 \cos i_2 + \sin i_1 \sin i_2 \cos(\Omega_1 - \Omega_2)$$
+1. **Mutual inclination of orbits | Взаимное наклонение орбит (\(I\)):**
+   \[\cos I = \cos i_1 \cos i_2 + \sin i_1 \sin i_2 \cos(\Omega_1 - \Omega_2)\]
 
-3. **Orbital metrics of Kholshevnikov | Орбитальные метрики Холшевникова ($\rho_1, \rho_2, \rho_5$):**
-   
-   $$\rho_2 = \sqrt{(1+e_1^2)p_1 + (1+e_2^2)p_2 - 2\sqrt{p_1 p_2}(\cos I + e_1 e_2 \cos P)}$$
+2. **Orbital metrics of Kholshevnikov | Орбитальные метрики Холшевникова (\(\rho_1, \rho_2, \rho_5\)):**
+   \[\rho_2 = \sqrt{(1+e_1^2)p_1 + (1+e_2^2)p_2 - 2\sqrt{p_1 p_2}(\cos I + e_1 e_2 \cos P)}\]
 
-5. **THE SOUTHWORTH & HAWKINS D-CRITERION | D-критерий Саутворта-Хокинса ($D_{SH}$):**
-   $$D_{SH} = \sqrt{(q_1 - q_2)^2 + (e_1 - e_2)^2 + 4\sin^2\frac{I}{2} + (e_1 + e_2)^2 \sin^2\Pi}$$
+3. **The Southworth & Hawkins D-criterion | D-критерий Саутворта-Хокинса (\(D_{SH}\)):**
+   \[D_{SH} = \sqrt{(q_1 - q_2)^2 + (e_1 - e_2)^2 + 4\sin^2\frac{I}{2} + (e_1 + e_2)^2 \sin^2\Pi}\]
 
-6. **D-критерий Драммонда ($D_D$):**
-   $$D_D = \sqrt{\left(\frac{e_1 - e_2}{e_1 + e_2}\right)^2 + \left(\frac{q_1 - q_2}{q_1 + q_2}\right)^2 + \left(\frac{I}{\pi}\right)^2 + \left(\frac{e_1 + e_2}{2}\right)^2 \left(\frac{\theta}{\pi}\right)^2}$$
+4. **The Drummond D-criterion | D-критерий Драммонда (\(D_D\)):**
+   \[D_D = \sqrt{\left(\frac{e_1 - e_2}{e_1 + e_2}\right)^2 + \left(\frac{q_1 - q_2}{q_1 + q_2}\right)^2 + \left(\frac{I}{\pi}\right)^2 + \left(\frac{e_1 + e_2}{2}\right)^2 \left(\frac{\theta}{\pi}\right)^2}\]
 
-   ## 📊 Структура данных
+5. **Minimum Orbit Intersection Distance | Минимальное расстояние пересечения орбит (\(MOID\)):**
+   Численный метод сканирования (дискретизации) по истинной аномалии обоих объектов (\(v_1, v_2 \in [0, 2\pi)\)) с использованием декартовых координат положения векторов орбит:
+   \[MOID = \min_{v_1, v_2} \sqrt{(x_1(v_1) - x_2(v_2))^2 + (y_1(v_1) - y_2(v_2))^2 + (z_1(v_1) - z_2(v_2))^2}\]
+
+
+## 📊 Структура данных
 
 ### Входные файлы (`infile1` / `infile2`)
 Текстовые файлы должны содержать строки со следующими параметрами, разделенными пробелами:
@@ -39,28 +54,29 @@ The program compares the orbital elements of two bodies at the same epochs (`JD1
 Где:
 * **JD** — Юлианская дата (используется для синхронизации потоков)
 * **t** — Время / эпоха
-* **a** — Большая полуось
+* **a** — Большая полуось (а.е.)
 * **e** — Эксцентриситет
 * **i** — Наклонение орбит (градусы)
 * **om** (\(\Omega\)) — Долгота восходящего узла (градусы)
 * **w** (\(\omega\)) — Аргумент перицентра (градусы)
 * **M** — Средняя аномалия (градусы)
-* **q** — Перигелийное расстояние
+* **q** — Перигелийное расстояние (а.е.)
 
 ### Выходной файл (`outfile`)
 Результаты записываются в структурированном виде:
 ```text
-[JD1] [t1] [ro1] [ro2] [ro5] [D_SH] [D_D]
+[JD1] [t1] [ro1] [ro2] [ro5] [D_SH] [D_D] [MOID]
 ```
 
----
 
 ## 🛠 Особенности реализации кода
 
-В алгоритме применены важные оптимизации для повышения точности астрономических расчетов:
+В алгоритме применены важные оптимизации для повышения точности и стабильности астрономических расчетов:
 * **Безопасное сравнение дат:** Поиск совпадений `JD1` и `JD2` реализован через дельту (`Abs(JD1 - JD2) < 1e-6`), что предотвращает ошибки округления вещественных чисел (`Real`/`Double`).
 * **Оптимизация прохода файлов:** При нахождении совпадения внутренний цикл немедленно прерывается (`Break`), переводя указатель на обработку следующей эпохи.
-* **Защита от математических исключений (Clamping):** Для экстремальных орбит (с высоким эксцентриситетом $e \to 1$) тригонометрические функции защищены от ошибок округления чисел с плавающей точкой (`NaN`/`Domain Error`). Аргументы функций `ArcCos` и `ArcSin` принудительно ограничиваются диапазоном `[-1, 1]`, а также добавлена проверка деления на ноль при вычислении секанса взаимного наклонения.
+* **Защита от математических исключений (Clamping):** Для экстремальных орбит (с высоким эксцентриситетом \(e \to 1\)) тригонометрические функции защищены от ошибок округления чисел с плавающей точкой (`NaN`/`Domain Error`). Аргументы функций `ArcCos` и `ArcSin` принудительно ограничиваются диапазоном `[-1, 1]`, а также добавлена проверка деления на ноль при вычислении секанса взаимного наклонения.
+* **Сеточный поиск глобального минимума:** Вычисление MOID интегрировано непосредственно в цикл совпадения эпох с помощью вложенного перебора истинных аномалий с шагом в \(1^{\circ}\), сопряженного с процедурой пересчета Кеплеровых элементов в декартовы координаты (`COOR`).
+
 
 ## 💻 Требования и запуск
 
@@ -76,4 +92,4 @@ fpc main.pas
 
 
 ## 📄 Лицензия
-Проект распространяется под лицензией MIT. Подробнее см. файл `LICENSE`
+Проект распространяется под лицензией MIT. Подробнее см. файл `LICENSE`.
