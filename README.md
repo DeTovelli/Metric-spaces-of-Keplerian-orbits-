@@ -21,6 +21,15 @@ The program compares the orbital elements of two celestial bodies at identical e
 * **Time Synchronization:** Automatically searches and compares orbital data on the same Julian Date (`JD`). | **Синхронизация по времени:** Автоматический поиск и сопоставление орбитальных данных на одинаковые Юлианские даты (`JD`).
 * **Kholshevnikov metrics:** Calculation of distances in factor spaces of orbits (\(\rho_1\), \(\rho_2\), \(\rho_5\)). | **Метрики Холшевникова:** Расчет расстояний в фактор-пространствах орбит (\(\rho_1\), \(\rho_2\), \(\rho_5\)).
 * **D-criteria:** Calculation of classical astronomical orbital similarity criteria (Southworth-Hawkins \(D_{SH}\) and Drummond \(D_D\)). | **D-критерии:** Вычисление классических астрономических критериев сходства орбит (Саутворта-Хокинса \(D_{SH}\) и Драммонда \(D_D\)).
+* **The Jopek D-criterion | D-критерий Йопека (\(D_J\)):**
+   Гибридный критерий (Jopek, 1993), снижающий зависимость от величины перигелийного расстояния:
+   \[D_J = \sqrt{(e_1 - e_2)^2 + \left(\frac{q_1 - q_2}{q_1 + q_2}\right)^2 + 4\sin^2\frac{I}{2} + (e_1 + e_2)^2 \sin^2\frac{\Pi}{2}}\]
+* **The Asher D-criterion | D-критерий Ашера (\(D_A\)):**
+   Метрика для анализа эволюционно связанных комплексов (Asher et al., 1993), не зависящая от прецессии узлов и перигелиев:
+   \[D_A = \sqrt{\left(\frac{a_1 - a_2}{3.0}\right)^2 + (e_1 - e_2)^2 + 4\sin^2\frac{i_1 - i_2}{2}}\]
+* **The Valsecchi D-criterion | D-критерий Вальсекки (\(D_N\)):**
+   Критерий на основе инвариантов Эпика и геоцентрических параметров сближения с Землей (Valsecchi et al., 1999):
+   \[D_N = \sqrt{(U_1 - U_2)^2 + (\cos\theta_1 - \cos\theta_2)^2 + \Delta\Phi^2 + \Delta\Xi^2}\]
 * **MOID Computation:** Numerical estimation of the Minimum Orbit Intersection Distance between two elliptical orbits. | **Вычисление MOID:** Численный расчет минимального расстояния между двумя эллиптическими орбитами в пространстве.
 
 
