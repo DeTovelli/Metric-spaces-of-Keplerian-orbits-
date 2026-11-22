@@ -10,13 +10,13 @@ uses
 
 Label MET1,AGAIN;
 
-Const N=85641074;  {���������� ������������ ������}
+Const N=85641074;  {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
     {IAU 1994}
-    KV=1/29.7846918325927450;  {��� �������� �������� � ��/� ��� mu=1}
+    KV=1/29.7846918325927450;  {ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½/ï¿½ ï¿½ï¿½ï¿½ mu=1}
     rad=Pi/180.0;
     au_km=1.49597870691000015E+8; {1 au in km; DE406}
-    day_sec = 86400;  {����� � �������}
-    KMAU=1/au_km;     {�� � ��}
+    day_sec = 86400;  {ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+    KMAU=1/au_km;     {ï¿½ï¿½ ï¿½ ï¿½ï¿½}
     GM=1.32712440018E+11;  {km3*s-2}
     MU=2.9591220828559110225E-4; {= k**2; k = 0.01720209895 [(AU^3 d^-2])^1/2}
 
@@ -31,7 +31,8 @@ TJD0,TJD,x,y,z,xx,yy,zz: Extended;
 Cx,Cy,Cz,A_m: Extended;
 JD1,t1,a1,e1,i1,om1,w1,M1,q1,p1,JD2,t2,a2,e2,i2,om2,w2,M2,q2,p2: Extended;
 alpha,F,CoT,SiT,T,coT1,KSI1,KSI2,LXc,LYc,LZc,LX,LY,LZ,L: Extended;
-CosI,CosP,ro1,ro2,ro5,PI_big,D_SH,D_D,Pheta:Extended;
+CosI,CosP,ro1,ro2,ro5,PI_big,D_SH,D_D,D_J,D_A,D_N,Pheta:Extended;
+T1_val, T2_val, U1, U2, CosTh1, CosTh2, dPhi, dXi: Extended;
 j,jj:integer;
 MOID, CurrentDist: Extended;
 v1_step, v2_step: Extended;
@@ -56,9 +57,9 @@ infile, infile1, infile2, outfile, outdebug: text;
 begin {main}
 
 {Assign(infile,'ref.orb'); Reset(infile);
-{��������� ����� ���������, ������� � �������� � JD}
+{ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ JD}
 {Read(infile, a,e,i,om,w,M,JD);
-{��������� ������� �������� ������� � �������}
+{ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 {i:=i*rad; om:=om*rad; w:=w*rad; M:=M*rad;
 JDi:=JD;
 
@@ -72,55 +73,55 @@ Rewrite(outdebug);  }
 Assign(outfile,'file.TXT');
 Rewrite(outfile);
 
-Writeln(outfile, 'JD t ro1 ro2 ro5 D_SH D_D MOID');
+Writeln(outfile, 'JD t ro1 ro2 ro5 D_SH D_D D_J D_A D_N MOID');
 RandSeed:=1;
 {Randomize;}
 
-{RC:=1.9;     {km, ������ ����������}
-{dens:=3.0;  {g cm-3, ��������� ����������}
-{mass:=1.0000; {g, ����� ����������}
-{rpart:=power(0.75*mass/(Pi*dens),1.0/3.0);  {cm, ������ ����������}
-{beta:=5.8E-5/(rpart*dens); {Fr/Fgr -- ������������ �����������}
-{mu_red:=MU*(1-beta); {�������� ����� ������ �� �������� ��������}
+{RC:=1.9;     {km, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{dens:=3.0;  {g cm-3, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{mass:=1.0000; {g, ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{rpart:=power(0.75*mass/(Pi*dens),1.0/3.0);  {cm, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{beta:=5.8E-5/(rpart*dens); {Fr/Fgr -- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{mu_red:=MU*(1-beta); {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 
 
 {kn:=sqrt(GM/(au_km*au_km*au_km))*day_sec;
-n_:=kn/(a*sqrt(a));    {���/���}
+n_:=kn/(a*sqrt(a));    {ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½}
 
 
-{�� ������� �������� ������� ��������}
+{ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 {EE:=kepl1(M,e);
 r:=a*(1-e*cos(EE));
 sv:=a*sqrt(1-e*e)*sin(EE)/r;
 cv:=a*(cos(EE)-e)/r;
 v:=ArcTg(sv,cv);
 
-{������� � ���� ��������� ������}
+{ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 {j:=0;
 Writeln(outfile, a:15:10,e:15:10,i/rad:15:9,om/rad:15:9,w/rad:15:9,M/rad:15:9,
            ' ',Jdi:14:5,'  ',v/rad:5:1,'  ',j:5);
 
 
-{��� � ���������� � ������}
-{alpha:=180*rad;  {����������� ������, 180 ��� }
+{ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
+{alpha:=180*rad;  {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, 180 ï¿½ï¿½ï¿½ }
 //TJD0:= 2459586.50;
 Assign(infile1,'elem_point1_2003EH1_-7430.dat');
 Reset(infile1);
-{��������� JD, ����� ���������, ������� � �������� }
+{ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ JD, ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ }
 Readln(infile1);
 Readln(infile1);
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
-i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {��������� ������� �������� ������� � �������}
+i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 Writeln(JD1:6:2,t1:6:2,a1:6:2,e1:6:2,i1:6:2,om1:6:2,w1:6:2,M1:6:2,q1:6:2);
 //Readln;
 
-Assign(infile2,'elem_point2_2019SG18_-7430.dat');
+Assign(infile2,'elem_point2_2002_CE26_-7430.dat');
 Reset(infile2);
-{��������� ����� ���������, ������� � �������� � JD}
+{ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ JD}
 Readln(infile2);
 Readln(infile2);
 Readln(infile2, JD2,t2,a2,e2,i2,om2,w2,M2,q2);
-i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {��������� ������� �������� ������� � �������}
+i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 
 Writeln(JD2:6:2,t2:6:2,a2,e2,i2,om2,w2,M2,q2);
 //Readln;
@@ -130,7 +131,7 @@ while not Eof(infile1) do
 begin
 Readln(infile1, JD1,t1,a1,e1,i1,om1,w1,M1,q1);
 // Converting angles from degrees to radians
-i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {��������� ������� �������� ������� � �������}
+i1:=i1*rad; om1:=om1*rad; w1:=w1*rad; M1:=M1*rad; {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
 p1:=a1*(1-sqr(e1));
 
 Writeln('TJD1 = ',JD1:6:2,' t1 = ',t1:6:2,t1:6:2);
@@ -143,7 +144,7 @@ for j:=1 to N do
   if JD1=JD2 then
    begin
    // Converting angles from degrees to radians
-    i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {��������� ������� �������� ������� � �������}
+    i2:=i2*rad; om2:=om2*rad; w2:=w2*rad; M2:=M2*rad; {ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½}
     p2:=a2*(1-sqr(e2));
     // Protection against floating-point rounding errors
     CosI:=(Cos(i1)*Cos(i2))+(Sin(i1)*Sin(i2)*Cos(om1-om2));
@@ -171,6 +172,31 @@ for j:=1 to N do
       ro5:=sqrt((1+sqr(e1))*p1+(1+sqr(e2))*p2-2*sqrt(p1*p2)*(e1*e2+Cos(i1-i2)));
       D_SH:=sqrt(sqr(q1-q2)+sqr(e1-e2)+4*sqr(Sin(I/2))+sqr(e1+e2)*sqr(Sin(PI_big)));
       D_D:=sqrt(sqr((e1-e2)/(e1+e2))+sqr((q1-q2)/(q1+q2))+sqr(I/Pi)+sqr((e1+e2)/2)*sqr(Pheta/Pi));
+      // Criteria Jopek (Jopek, 1993)
+      D_J  := sqrt(sqr(e1-e2) + sqr((q1-q2)/(q1+q2)) + 4*sqr(Sin(I/2)) + sqr(e1+e2)*sqr(Sin(PI_big/2)));
+      // Êðèòåðèé Àøåðà (Asher et al., 1993)
+      D_A := sqrt(sqr((a1-a2)/3.0) + sqr(e1-e2) + 4*sqr(Sin((i1-i2)/2)));
+
+      // ======= ÊÐÈÒÅÐÈÉ ÂÀËÜÑÅÊÊÈ (D_N, Valsecchi et al., 1999) =======
+      // 1. Ïîñòîÿííûå Òèññåðàíà îòíîñèòåëüíî Çåìëè (r = 1 AU)
+      T1_val := (1.0 / a1) + 2.0 * sqrt(a1 * (1.0 - sqr(e1))) * Cos(i1);
+      T2_val := (1.0 / a2) + 2.0 * sqrt(a2 * (1.0 - sqr(e2))) * Cos(i2);
+
+      // 2. Ãåîöåíòðè÷åñêèå ñêîðîñòè U (ñ çàùèòîé îò U^2 <= 0 äëÿ íåïåðåñåêàþùèõ îðáèò)
+      if (3.0 - T1_val) > 1e-12 then U1 := sqrt(3.0 - T1_val) else U1 := 1e-6;
+      if (3.0 - T2_val) > 1e-12 then U2 := sqrt(3.0 - T2_val) else U2 := 1e-6;
+
+      // 3. Êîñèíóñû óãëîâ theta (ñ çàùèòîé EnsureRange)
+      CosTh1 := EnsureRange((1.0 - sqr(U1) - (1.0 / a1)) / (2.0 * U1), -1.0, 1.0);
+      CosTh2 := EnsureRange((1.0 - sqr(U2) - (1.0 / a2)) / (2.0 * U2), -1.0, 1.0);
+
+      // 4. Óãëîâàÿ ðàçíîñòü (ýëîíãàöèÿ óçëîâ / àðãóìåíòîâ)
+      dPhi := 2.0 * Sin((om1 - om2) / 2.0);
+      dXi  := 2.0 * Sin((w1 - w2) / 2.0);
+
+      // Èòîãîâûé êðèòåðèé D_N
+      D_N := sqrt(sqr(U1 - U2) + sqr(CosTh1 - CosTh2) + sqr(dPhi) + sqr(dXi));
+      // ================================================================
 
       // ======= START OF OPTIMIZED TWO-STAGE MOID CALCULATION BLOCK =======
       MOID := 1e10;
@@ -248,8 +274,8 @@ for j:=1 to N do
       Writeln('D_SH = ',D_SH:6:6);
       Writeln('MOID = ',MOID:6:6);
 
-      Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' ', MOID);
-      Break; 
+      Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' ', D_J,' ', D_A,' ', D_N,' ', MOID);
+      Break;
     end;
   end;
 end;
@@ -356,16 +382,16 @@ end.
     //VYE:=yy;
     //VZE:=zz;
 
-    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' ', MOID);
+    Writeln(outfile, JD1:7:5,' ',t1:4:5,' ', ro1,' ', ro2,' ', ro5,' ', D_SH,' ', D_D,' ', D_J,' ', MOID);
     begin
         Break; // ????????? ????
     end;
    end;
  end;
 
- { ve:=v; {�???�? ?� ?�???}
+ { ve:=v; {ï¿½???ï¿½? ?ï¿½ ?ï¿½???}
 {  if ve<0 then ve:=ve+2*pi;
-  {�?�?�??? �???��}
+  {ï¿½?ï¿½?ï¿½??? ï¿½???ï¿½ï¿½}
 {   COOR(A,E,I,OM,W,VE,mu,RE,XE,YE,ZE,VXE,VYE,VZE,VV);
    C:=SQRT((1/(rpart*dens*EXP(LN(RE)*2.25))-0.013*RC) *RC)*656;  {cm/sec}
 {   C:=C*1E-5*(day_sec/au_km); {cm/sec => au/day}
@@ -377,18 +403,18 @@ end.
   T:=ArcTg(SiT,CoT);
 
 
-  LXc:=CoT;              {�?�? ? ?��??��� ?????�?}
+  LXc:=CoT;              {ï¿½?ï¿½? ? ?ï¿½ï¿½??ï¿½ï¿½ï¿½ ?????ï¿½?}
  { LYc:=SiT*COS(F);
   LZc:=SiT*SIN(F);
 
-  {?? ��???�?? ?��??��??�?�?? �?? ��? ?����?� ��?�?� �?????� !}
+  {?? ï¿½ï¿½???ï¿½?? ?ï¿½ï¿½??ï¿½ï¿½??ï¿½?ï¿½?? ï¿½?? ï¿½ï¿½? ?ï¿½ï¿½ï¿½ï¿½?ï¿½ ï¿½ï¿½?ï¿½?ï¿½ ï¿½?????ï¿½ !}
  { Convert_(-xe,-ye,-ze,vze*ye-vye*ze,vxe*ze-vze*xe,vye*xe-vxe*ye,
-  LXc,LYc,LZc,LX,LY,LZ);  {� ??�?????????? ?� ?��??���}
+  LXc,LYc,LZc,LX,LY,LZ);  {ï¿½ ??ï¿½?????????? ?ï¿½ ?ï¿½ï¿½??ï¿½ï¿½ï¿½}
 
 {  CX:=C*LX;CY:=C*LY;CZ:=C*LZ;
   VXC:=VXE+CX;VYC:=VYE+CY;VZC:=VZE+CZ;
   VELOR3(XE,YE,ZE,VXC,VYC,VZC,AI,EI,II,OMI,WI,VI,MU);
-  if ai<0 then continue;  {�?????�?� ??????��?}
+  if ai<0 then continue;  {ï¿½?????ï¿½?ï¿½ ??????ï¿½ï¿½?}
 {  if omi<0 then omi:=omi+2*pi;
 
   sE:=sin(vi)*re/(ai*sqrt(1-sqr(ei)));
@@ -397,15 +423,15 @@ end.
   MI:=EEi-ei*sE;
   if Mi<0 then Mi:=Mi+2*PI;   }
 
-  (*  ??�? ???�? �?�?�, ??�? ????�? �? ? ?�???
+  (*  ??ï¿½? ???ï¿½? ï¿½?ï¿½?ï¿½, ??ï¿½? ????ï¿½? ï¿½? ? ?ï¿½???
 
-	   {?� ve ��?��?� ��?? ????�?�}
+	   {?ï¿½ ve ï¿½ï¿½?ï¿½ï¿½?ï¿½ ï¿½ï¿½?? ????ï¿½?ï¿½}
 	  sE:=sin(ve)*re/(a*sqrt(1-sqr(e)));
 	  cE:=cos(ve)*re/a+e;
 	  EE:=ArcTg(sE,cE);
 	  M:=EE-e*sE;
 
-	  {�???�?�, ??� �?�?��? �????� �?��????? ? ���?�?? ??�?���?�?? ??????�??}
+	  {ï¿½???ï¿½?ï¿½, ??ï¿½ ï¿½?ï¿½?ï¿½ï¿½? ï¿½????ï¿½ ï¿½?ï¿½ï¿½????? ? ï¿½ï¿½ï¿½?ï¿½?? ??ï¿½?ï¿½ï¿½ï¿½?ï¿½?? ??????ï¿½??}
 	  if M<Pi then
 	    JDi:=JD+M/n_   {M in rad}
 	  else JDi:=JD-(2*Pi-M)/n_;
